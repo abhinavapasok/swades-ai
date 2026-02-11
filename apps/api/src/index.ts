@@ -33,12 +33,13 @@ app.use('*', errorHandler())
 app.use('/api/*', rateLimiter(100, 60 * 1000)) // 100 requests per minute
 
 // API Routes
-app.route('/api/chat', chatRoutes)
-app.route('/api/agents', agentRoutes)
-app.route('/api/health', healthRoutes)
-app.route('/api/users', userRoutes)
-app.route('/api/orders', orderRoutes)
-app.route('/api/payments', paymentRoutes)
+const routes = app
+  .route('/api/chat', chatRoutes)
+  .route('/api/agents', agentRoutes)
+  .route('/api/health', healthRoutes)
+  .route('/api/users', userRoutes)
+  .route('/api/orders', orderRoutes)
+  .route('/api/payments', paymentRoutes)
 
 // Root route
 app.get('/', (c) => {
@@ -75,4 +76,4 @@ serve({
 })
 
 // Export for type inference (Hono RPC)
-export type AppType = typeof app
+export type AppType = typeof routes

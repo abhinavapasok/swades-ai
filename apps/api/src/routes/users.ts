@@ -1,7 +1,8 @@
 import { Hono } from 'hono'
 import { UserController } from '../controllers/userController.js'
 
-export const userRoutes = new Hono()
+const app = new Hono()
 
-userRoutes.get('/', UserController.listUsers)
-userRoutes.get('/:id', UserController.getUser)
+export const userRoutes = app
+    .get('/', UserController.listUsers)
+    .get('/:id', UserController.getUser)

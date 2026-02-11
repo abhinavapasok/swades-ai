@@ -3,7 +3,8 @@ import useSWR from 'swr'
 import { Package, Truck, Clock, CheckCircle2, XCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { swrFetcher, Order } from '@/lib/api'
+import { Order } from '@/lib/api'
+import client from '@/lib/client'
 
 interface OrdersViewProps {
     userId: string
@@ -30,7 +31,14 @@ const StatusIcon = ({ status }: { status: string }) => {
 }
 
 export function OrdersView({ userId, onAction }: OrdersViewProps) {
-    const { data, error, isLoading } = useSWR(`/orders?userId=${userId}`, swrFetcher)
+    const { data, error, isLoading } = useSWR(
+        ['orders', userId],
+        async () => {
+            const res = await client.api.orders.$get({ query: { userId } })
+            if (!res.ok) throw new Error('Failed to fetch orders')
+            return await res.json()
+        }
+    )
 
     if (isLoading) return <div className="p-8 text-center text-muted-foreground">Loading orders...</div>
     if (error) return <div className="p-8 text-center text-destructive">Failed to load orders</div>
@@ -50,7 +58,7 @@ export function OrdersView({ userId, onAction }: OrdersViewProps) {
         <div className="max-w-4xl mx-auto p-6 space-y-6">
             <h2 className="text-2xl font-bold tracking-tight">Your Orders</h2>
             <div className="grid gap-4">
-                {orders.map((order: Order) => (
+                {orders.map((order) => (
                     <div key={order.id} className="rounded-xl border border-border bg-card p-6 shadow-sm">
                         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                             <div className="space-y-1">

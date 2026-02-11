@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import useSWR from 'swr'
-import { deleteConversation, getConversation, ConversationListItem, swrFetcher } from '../lib/api'
+import { deleteConversation, getConversation, ConversationListItem } from '../lib/api'
+import client from '../lib/client'
 
 interface UseConversationsOptions {
   userId: string
@@ -12,7 +13,14 @@ export function useConversations({ userId }: UseConversationsOptions) {
     error: swrError,
     isLoading,
     mutate
-  } = useSWR(userId ? `/chat/conversations?userId=${userId}` : null, swrFetcher)
+  } = useSWR(
+    userId ? ['conversations', userId] : null,
+    async () => {
+      const res = await client.api.chat.conversations.$get({ query: { userId } })
+      if (!res.ok) throw new Error('Failed to fetch conversations')
+      return await res.json()
+    }
+  )
 
   const conversations = data?.conversations || []
 

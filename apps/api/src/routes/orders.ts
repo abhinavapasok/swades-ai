@@ -1,7 +1,8 @@
 import { Hono } from 'hono'
 import { OrderController } from '../controllers/orderController.js'
 
-export const orderRoutes = new Hono()
+const app = new Hono()
 
-orderRoutes.get('/', OrderController.listOrders)
-orderRoutes.get('/:id', OrderController.getOrder)
+export const orderRoutes = app
+    .get('/', OrderController.listOrders)
+    .get('/:id', OrderController.getOrder)

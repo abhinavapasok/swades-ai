@@ -1,10 +1,9 @@
 import { Hono } from 'hono'
 import { prisma } from '../db/client.js'
 
-export const healthRoutes = new Hono()
+const app = new Hono()
 
-// GET /api/health - Health check
-healthRoutes.get('/', async (c) => {
+export const healthRoutes = app.get('/', async (c) => {
   const healthCheck = {
     status: 'healthy',
     timestamp: new Date().toISOString(),

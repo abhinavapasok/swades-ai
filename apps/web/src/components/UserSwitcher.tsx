@@ -10,7 +10,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
-import { swrFetcher, User as ApiUser } from '@/lib/api'
+import { User as ApiUser } from '@/lib/api'
+import client from '@/lib/client'
 
 interface UserSwitcherProps {
     currentUserId: string
@@ -19,7 +20,14 @@ interface UserSwitcherProps {
 }
 
 export function UserSwitcher({ currentUserId, onUserChange, collapsed = false }: UserSwitcherProps) {
-    const { data, error } = useSWR('/users', swrFetcher)
+    const { data, error } = useSWR(
+        'users',
+        async () => {
+            const res = await client.api.users.$get()
+            if (!res.ok) throw new Error('Failed to fetch users')
+            return await res.json()
+        }
+    )
 
     const users: ApiUser[] = data?.data || []
     const currentUser = users.find((u) => u.id === currentUserId)

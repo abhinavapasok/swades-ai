@@ -1,79 +1,21 @@
-import apiClient from './axiosConfig'
+import client from './client'
+import { hc } from 'hono/client'
+import type { InferResponseType } from 'hono/client'
+import type { AppType } from '@swadesai/api'
 
-// --- Types & Interfaces ---
+type Client = ReturnType<typeof hc<AppType>>
 
-export interface Message {
-  id: string
-  conversationId: string
-  role: 'user' | 'assistant' | 'system'
-  content: string
-  agentType?: string
-  metadata?: Record<string, unknown>
-  createdAt: string
-}
+export type Conversation = Extract<InferResponseType<Client['api']['chat']['conversations'][':id']['$get']>, { id: string }>
+export type Message = Conversation extends { messages: (infer M)[] } ? M : any
+export type ConversationListItem = Extract<InferResponseType<Client['api']['chat']['conversations']['$get']>, { conversations: any }> extends { conversations: (infer C)[] } ? C : any
+export type Agent = Extract<InferResponseType<Client['api']['agents']['$get']>, { agents: any }> extends { agents: (infer A)[] } ? A : any
+export type User = Extract<InferResponseType<Client['api']['users']['$get']>, { data: any }> extends { data: (infer U)[] } ? U : any
+export type Order = Extract<InferResponseType<Client['api']['orders']['$get']>, { data: any }> extends { data: (infer O)[] } ? O : any
+export type Payment = Extract<InferResponseType<Client['api']['payments']['$get']>, { data: any }> extends { data: (infer P)[] } ? P : any
 
-export interface Conversation {
-  id: string
-  userId: string
-  title: string | null
-  status: string
-  createdAt: string
-  updatedAt: string
-  messages?: Message[]
-}
+export type OrderItem = Order extends { items: (infer I)[] } ? I : any
 
-export interface ConversationListItem {
-  id: string
-  title: string | null
-  status: string
-  messageCount: number
-  lastMessage?: string
-  createdAt: string
-  updatedAt: string
-}
-
-export interface Agent {
-  type: string
-  name: string
-  description: string
-  capabilities: string[]
-}
-
-export interface User {
-  id: string
-  name: string
-  email: string
-}
-
-export interface OrderItem {
-  id: string
-  productName: string
-  quantity: number
-  price: number
-}
-
-export interface Order {
-  id: string
-  orderNumber: string
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
-  totalAmount: number
-  shippingAddress: string
-  trackingNumber?: string
-  items: OrderItem[]
-  createdAt: string
-}
-
-export interface Payment {
-  id: string
-  invoiceNumber: string
-  amount: number
-  status: 'paid' | 'pending' | 'failed' | 'refunded'
-  paymentMethod: string
-  refundAmount?: number
-  createdAt: string
-}
-
-export interface StreamEvent {
+export type StreamEvent = {
   type: 'typing' | 'agent' | 'content' | 'done' | 'error'
   agent?: string
   text?: string
@@ -83,48 +25,30 @@ export interface StreamEvent {
   confidence?: number
 }
 
-// --- Fetchers & SWR ---
-
-/**
- * Standard SWR fetcher using the centralized apiClient (Axios)
- */
-export const swrFetcher = (url: string) => apiClient.get(url).then((res) => res.data)
-
-// --- API Functions ---
-
-/**
- * Send a message and stream the response.
- * NOTE: Uses native fetch because Axios does not natively support ReadableStream/SSE streaming as well as fetch does.
- */
 export async function* sendMessage(
   message: string,
   userId: string,
   conversationId?: string
 ): AsyncGenerator<StreamEvent> {
-  const baseUrl = import.meta.env.VITE_API_URL || ''
-  const response = await fetch(`${baseUrl}/chat/messages`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message, userId, conversationId }),
+  const response = await client.api.chat.messages.$post({
+    json: { message, userId, conversationId }
   })
 
   if (!response.ok) {
     let errorMessage = `HTTP error! status: ${response.status}`
     try {
-      const errorData = await response.json()
+      const errorData = await response.json() as any
       if (errorData.error?.message) {
         errorMessage = errorData.error.message
       }
     } catch {
-      // If not JSON, use default error message
+      // Ignore JSON parse errors
     }
     throw new Error(errorMessage)
   }
 
   const reader = response.body?.getReader()
-  if (!reader) {
-    throw new Error('No response body')
-  }
+  if (!reader) throw new Error('No response body')
 
   const decoder = new TextDecoder()
   let buffer = ''
@@ -150,71 +74,61 @@ export async function* sendMessage(
   }
 }
 
-/**
- * Get a single conversation with all its messages
- */
 export async function getConversation(conversationId: string): Promise<Conversation> {
-  const { data } = await apiClient.get<Conversation>(`/chat/conversations/${conversationId}`)
-  return data
+  const res = await client.api.chat.conversations[':id'].$get({
+    param: { id: conversationId }
+  })
+  if (!res.ok) throw new Error('Failed to fetch conversation')
+  return await res.json() as unknown as Conversation
 }
 
-/**
- * List all conversations for a specific user
- */
 export async function listConversations(userId: string): Promise<{ conversations: ConversationListItem[] }> {
-  const { data } = await apiClient.get<{ conversations: ConversationListItem[] }>('/chat/conversations', {
-    params: { userId },
+  const res = await client.api.chat.conversations.$get({
+    query: { userId }
   })
-  return data
+  if (!res.ok) throw new Error('Failed to fetch conversations')
+  return await res.json() as unknown as { conversations: ConversationListItem[] }
 }
 
-/**
- * Delete a specific conversation by ID
- */
 export async function deleteConversation(conversationId: string): Promise<void> {
-  await apiClient.delete(`/chat/conversations/${conversationId}`)
+  const res = await client.api.chat.conversations[':id'].$delete({
+    param: { id: conversationId }
+  })
+  if (!res.ok) throw new Error('Failed to delete conversation')
 }
 
-/**
- * List all available AI agents in the system
- */
 export async function listAgents(): Promise<{ agents: Agent[] }> {
-  const { data } = await apiClient.get<{ agents: Agent[] }>('/agents')
-  return data
+  const res = await client.api.agents.$get()
+  if (!res.ok) throw new Error('Failed to fetch agents')
+  return await res.json() as unknown as { agents: Agent[] }
 }
 
-/**
- * Get capabilities and details for a specific agent type
- */
 export async function getAgentCapabilities(agentType: string): Promise<Agent> {
-  const { data } = await apiClient.get<Agent>(`/agents/${agentType}/capabilities`)
-  return data
+  const res = await client.api.agents[':type'].capabilities.$get({
+    param: { type: agentType }
+  })
+  if (!res.ok) throw new Error('Failed to fetch agent capabilities')
+  return await res.json() as unknown as Agent
 }
 
-/**
- * List all users (demo purposes)
- */
 export async function listUsers(): Promise<{ data: User[] }> {
-  const { data } = await apiClient.get<{ data: User[] }>('/users')
-  return data
+  const res = await client.api.users.$get()
+  if (!res.ok) throw new Error('Failed to fetch users')
+  return await res.json() as unknown as { data: User[] }
 }
 
-/**
- * List all orders for a specific user
- */
 export async function listOrders(userId: string): Promise<{ data: Order[] }> {
-  const { data } = await apiClient.get<{ data: Order[] }>('/orders', {
-    params: { userId },
+  const res = await client.api.orders.$get({
+    query: { userId }
   })
-  return data
+  if (!res.ok) throw new Error('Failed to fetch orders')
+  return await res.json() as unknown as { data: Order[] }
 }
 
-/**
- * List all payments for a specific user
- */
 export async function listPayments(userId: string): Promise<{ data: Payment[] }> {
-  const { data } = await apiClient.get<{ data: Payment[] }>('/payments', {
-    params: { userId },
+  const res = await client.api.payments.$get({
+    query: { userId }
   })
-  return data
+  if (!res.ok) throw new Error('Failed to fetch payments')
+  return await res.json() as unknown as { data: Payment[] }
 }

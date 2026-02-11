@@ -3,7 +3,8 @@ import useSWR from 'swr'
 import { CreditCard, DollarSign, Calendar, AlertCircle, CheckCircle2, History } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { swrFetcher, Payment } from '@/lib/api'
+import { Payment } from '@/lib/api'
+import client from '@/lib/client'
 
 interface PaymentsViewProps {
     userId: string
@@ -18,7 +19,14 @@ const statusColors: Record<string, string> = {
 }
 
 export function PaymentsView({ userId, onAction }: PaymentsViewProps) {
-    const { data, error, isLoading } = useSWR(`/payments?userId=${userId}`, swrFetcher)
+    const { data, error, isLoading } = useSWR(
+        ['payments', userId],
+        async () => {
+            const res = await client.api.payments.$get({ query: { userId } })
+            if (!res.ok) throw new Error('Failed to fetch payments')
+            return await res.json()
+        }
+    )
 
     if (isLoading) return <div className="p-8 text-center text-muted-foreground">Loading payments...</div>
     if (error) return <div className="p-8 text-center text-destructive">Failed to load payments</div>
@@ -38,7 +46,7 @@ export function PaymentsView({ userId, onAction }: PaymentsViewProps) {
         <div className="max-w-4xl mx-auto p-6 space-y-6">
             <h2 className="text-2xl font-bold tracking-tight">Payment History</h2>
             <div className="grid gap-4">
-                {payments.map((payment: Payment) => (
+                {payments.map((payment) => (
                     <div key={payment.id} className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
                         <div className="p-6">
                             <div className="flex flex-wrap items-center justify-between gap-4">
@@ -90,3 +98,4 @@ export function PaymentsView({ userId, onAction }: PaymentsViewProps) {
         </div>
     )
 }
+
