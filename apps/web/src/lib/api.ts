@@ -102,7 +102,7 @@ export async function* sendMessage(
   conversationId?: string
 ): AsyncGenerator<StreamEvent> {
   const baseUrl = import.meta.env.VITE_API_URL || ''
-  const response = await fetch(`${baseUrl}/api/chat/messages`, {
+  const response = await fetch(`${baseUrl}/chat/messages`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ message, userId, conversationId }),
