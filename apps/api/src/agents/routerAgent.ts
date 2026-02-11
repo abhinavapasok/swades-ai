@@ -1,6 +1,6 @@
 import { generateObject } from 'ai'
 import { z } from 'zod'
-import { getModel } from './modelConfig.js'
+import { getModel } from '../lib/modelConfig.js'
 
 export type AgentType = 'support' | 'order' | 'billing'
 

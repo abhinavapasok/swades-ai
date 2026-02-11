@@ -1,6 +1,6 @@
 import { streamText, tool, stepCountIs } from 'ai'
 import { z } from 'zod'
-import { getModel } from './modelConfig.js'
+import { getModel } from '../lib/modelConfig.js'
 import {
   fetchOrderDetails,
   checkDeliveryStatus,
