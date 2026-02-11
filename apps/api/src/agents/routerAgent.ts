@@ -2,13 +2,9 @@ import { generateText, Output } from 'ai'
 import { z } from 'zod'
 import { getModel } from '../lib/modelConfig.js'
 
-export type AgentType = 'support' | 'order' | 'billing'
+import { type AgentType, type ClassificationResult, type Agent } from '@swadesai/shared'
 
-export interface ClassificationResult {
-  agentType: AgentType
-  confidence: number
-  reasoning: string
-}
+export { type AgentType, type ClassificationResult }
 
 const classificationSchema = z.object({
   agentType: z.enum(['support', 'order', 'billing']),
@@ -69,7 +65,7 @@ export async function classifyIntent(
 /**
  * Get information about all available agents
  */
-export function getAgentInfo() {
+export function getAgentInfo(): Agent[] {
   return [
     {
       type: 'router',

@@ -23,6 +23,7 @@
     "@prisma/client": "^6.4.1",
     "ai": "^6.0.78",
     "ai-sdk-ollama": "^3.5.0",
+    "@swadesai/shared": "workspace:*",
     "hono": "^4.7.5",
     "zod": "^3.24.2"
   },

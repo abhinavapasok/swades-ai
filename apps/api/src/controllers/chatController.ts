@@ -1,6 +1,7 @@
 import { Context } from 'hono'
 import { streamSSE } from 'hono/streaming'
 import { ChatService } from '../services/chatService.js'
+import { type StreamEvent } from '@swadesai/shared'
 
 export class ChatController {
   /**
@@ -42,7 +43,7 @@ export class ChatController {
             type: 'typing',
             agent: 'router',
             message: 'Analyzing your request...'
-          }),
+          } satisfies StreamEvent),
         })
 
         // Process message
@@ -59,7 +60,7 @@ export class ChatController {
             agent: result.agentType,
             reasoning: result.classification.reasoning,
             confidence: result.classification.confidence,
-          }),
+          } satisfies StreamEvent),
         })
 
         // Send typing indicator with assigned agent
@@ -68,7 +69,7 @@ export class ChatController {
             type: 'typing',
             agent: result.agentType,
             message: 'Thinking...',
-          }),
+          } satisfies StreamEvent),
         })
 
         // Stream the response
@@ -80,7 +81,7 @@ export class ChatController {
             data: JSON.stringify({
               type: 'content',
               text: chunk,
-            }),
+            } satisfies StreamEvent),
           })
         }
 
@@ -100,8 +101,8 @@ export class ChatController {
           data: JSON.stringify({
             type: 'done',
             conversationId: conversation.id,
-            agentType: result.agentType,
-          }),
+            agent: result.agentType,
+          } satisfies StreamEvent),
         })
       } catch (error) {
         console.error('Streaming error:', error)
@@ -109,7 +110,7 @@ export class ChatController {
           data: JSON.stringify({
             type: 'error',
             message: error instanceof Error ? error.message : 'An error occurred',
-          }),
+          } satisfies StreamEvent),
         })
       }
     })

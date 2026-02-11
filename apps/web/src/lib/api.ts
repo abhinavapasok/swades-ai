@@ -2,9 +2,22 @@ import client from './client'
 import { hc } from 'hono/client'
 import type { InferResponseType } from 'hono/client'
 import type { AppType } from '@swadesai/api'
+import {
+  type StreamEvent,
+  type AgentType,
+  type Conversation as SharedConversation,
+  type Message as SharedMessage,
+  type Agent as SharedAgent,
+  type User as SharedUser,
+  type Order as SharedOrder,
+  type Payment as SharedPayment
+} from '@swadesai/shared'
+
+export type { StreamEvent, AgentType }
 
 type Client = ReturnType<typeof hc<AppType>>
 
+// Use InferResponseType for exact API response matching, but export them
 export type Conversation = Extract<InferResponseType<Client['api']['chat']['conversations'][':id']['$get']>, { id: string }>
 export type Message = Conversation extends { messages: (infer M)[] } ? M : any
 export type ConversationListItem = Extract<InferResponseType<Client['api']['chat']['conversations']['$get']>, { conversations: any }> extends { conversations: (infer C)[] } ? C : any
@@ -14,17 +27,6 @@ export type Order = Extract<InferResponseType<Client['api']['orders']['$get']>, 
 export type Payment = Extract<InferResponseType<Client['api']['payments']['$get']>, { data: any }> extends { data: (infer P)[] } ? P : any
 
 export type OrderItem = Order extends { items: (infer I)[] } ? I : any
-
-export type StreamEvent = {
-  type: 'typing' | 'agent' | 'content' | 'done' | 'error'
-  agent?: string
-  text?: string
-  message?: string
-  conversationId?: string
-  reasoning?: string
-  confidence?: number
-}
-
 export async function* sendMessage(
   message: string,
   userId: string,

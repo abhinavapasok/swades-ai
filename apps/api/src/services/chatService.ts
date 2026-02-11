@@ -1,19 +1,19 @@
 import { type StreamTextResult } from 'ai'
+import { type AgentType } from '@swadesai/shared'
 import { prisma } from '../db/client.js'
 import {
   classifyIntent,
   supportAgent,
   orderAgent,
   billingAgent,
-  type AgentType
 } from '../agents/index.js'
 
 export interface MessageData {
   conversationId: string
-  role: string
+  role: 'user' | 'assistant' | 'system'
   content: string
-  agentType?: string
-  metadata?: object
+  agentType?: AgentType
+  metadata?: Record<string, unknown>
 }
 
 export class ChatService {
