@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react'
+
 interface TypingIndicatorProps {
     agent?: string
     message?: string
@@ -10,8 +12,30 @@ const agentLabels: Record<string, string> = {
     billing: 'Billing agent is thinking',
 }
 
+const thinkingPhrases = [
+    'Thinking',
+    'Analyzing',
+    'Searching',
+    'Processing',
+    'Just a second',
+    'Gathering data',
+    'Almost there',
+]
+
 export function TypingIndicator({ agent, message }: TypingIndicatorProps) {
-    const label = message || (agent && agentLabels[agent]) || 'Thinking'
+    const [phraseIndex, setPhraseIndex] = useState(0)
+
+    useEffect(() => {
+        if (message) return
+
+        const interval = setInterval(() => {
+            setPhraseIndex((prev) => (prev + 1) % thinkingPhrases.length)
+        }, 2000)
+
+        return () => clearInterval(interval)
+    }, [message])
+
+    const label = message || (agent && agentLabels[agent]) || thinkingPhrases[phraseIndex]
 
     return (
         <div className="flex gap-3 animate-fade-up">

@@ -6,6 +6,7 @@ export interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
   agentType?: string
+  reasoning?: string
   isStreaming?: boolean
 }
 
@@ -95,7 +96,7 @@ export function useChat({ userId, onConversationCreated }: UseChatOptions) {
         setTyping({ isTyping: false }) // Clear typing indicator once an agent takes over
         setCurrentAgent(event.agent || null)
         setMessages(prev => prev.map(m =>
-          m.id === id ? { ...m, agentType: event.agent } : m
+          m.id === id ? { ...m, agentType: event.agent, reasoning: event.reasoning } : m
         ))
         break
       }

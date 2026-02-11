@@ -1,5 +1,5 @@
 import ReactMarkdown from 'react-markdown'
-import { Bot } from 'lucide-react'
+import { Bot, ChevronDown, ChevronRight, BrainCircuit } from 'lucide-react'
 import { ChatMessage, TypingState } from '../hooks/useChat'
 import { AgentBadge } from './AgentBadge'
 
@@ -34,12 +34,29 @@ export function MessageBubble({ message, typing }: MessageBubbleProps) {
 
             {/* Message Content */}
             <div className="flex-1 min-w-0 space-y-2">
-                {/* Agent Label */}
-                {message.agentType && (
-                    <div className="flex items-center gap-2">
-                        <AgentBadge type={agentType} />
-                    </div>
-                )}
+                {/* Agent Label & Reasoning */}
+                <div className="flex flex-col gap-2">
+                    {message.agentType && (
+                        <div className="flex items-center gap-2">
+                            <AgentBadge type={agentType} />
+                        </div>
+                    )}
+
+                    {message.reasoning && (
+                        <details className="group">
+                            <summary className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors list-none uppercase tracking-wider">
+                                <ChevronRight className="h-3 w-3 group-open:rotate-90 transition-transform" />
+                                <BrainCircuit className="h-3 w-3" />
+                                <span>AI Reasoning</span>
+                            </summary>
+                            <div className="mt-1.5 pl-4 ml-1.5 border-l border-border/50">
+                                <p className="text-xs text-muted-foreground/80 leading-relaxed italic">
+                                    {message.reasoning}
+                                </p>
+                            </div>
+                        </details>
+                    )}
+                </div>
 
                 {/* Message Text */}
                 <div className="prose-chat text-foreground bg-accent/5 rounded-2xl p-4 border border-border/50 backdrop-blur-sm shadow-sm">
