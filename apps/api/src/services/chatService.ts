@@ -1,3 +1,4 @@
+import { type StreamTextResult } from 'ai'
 import { prisma } from '../db/client.js'
 import {
   classifyIntent,
@@ -148,7 +149,11 @@ export class ChatService {
     message: string,
     userId: string,
     conversationId: string
-  ) {
+  ): Promise<{
+    stream: StreamTextResult<any, any>
+    agentType: AgentType
+    classification: any // Using any for classification to avoid deeper type issues if needed
+  }> {
     // Get conversation history for context
     const history = await this.getRecentMessages(conversationId)
     const historyText = history.map(m => `${m.role}: ${m.content}`)

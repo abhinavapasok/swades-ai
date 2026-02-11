@@ -1,4 +1,4 @@
-import { streamText, tool, stepCountIs } from 'ai'
+import { streamText, tool, stepCountIs, type StreamTextResult } from 'ai'
 import { z } from 'zod'
 import { getModel } from '../lib/modelConfig.js'
 import {
@@ -110,7 +110,7 @@ export const orderAgent = {
     userId: string,
     conversationId: string,
     messageHistory: { role: 'user' | 'assistant'; content: string }[] = [],
-  ) {
+  ): Promise<StreamTextResult<any, any>> {
     return streamText({
       model: getModel(),
       system: ORDER_SYSTEM_PROMPT,
