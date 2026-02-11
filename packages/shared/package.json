@@ -4,9 +4,20 @@
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./*": {
+      "import": "./dist/*.js",
+      "types": "./dist/*.d.ts"
+    }
+  },
   "scripts": {
-    "build": "tsc",
+    "build": "tsup src/index.ts --format esm --dts --clean",
     "lint": "eslint src/",
     "check-types": "tsc --noEmit"
   },
@@ -14,6 +25,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "tsup": "^8.5.1",
     "typescript": "^5.9.2"
   }
 }

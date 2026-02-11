@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { AGENT_TYPES } from './constants.js';
+import { AGENT_TYPES } from './constants';
 
 // Agent types schema
 export const AgentTypeSchema = z.enum(AGENT_TYPES);
