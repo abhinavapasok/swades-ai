@@ -1,9 +1,8 @@
-import React from 'react'
 import useSWR from 'swr'
 import { Package, Truck, Clock, CheckCircle2, XCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { Order } from '@/lib/api'
+
 import client from '@/lib/client'
 
 interface OrdersViewProps {

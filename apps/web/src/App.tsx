@@ -5,7 +5,6 @@ import { OrdersView } from './components/OrdersView'
 import { PaymentsView } from './components/PaymentsView'
 import { cn } from '@/lib/utils'
 
-// Subcomponents
 import { ChatView } from './components/ChatView'
 import { Sidebar } from './components/Sidebar'
 import { MobileHeader } from './components/MobileHeader'
@@ -22,7 +21,6 @@ function App() {
 
     const {
         isMobile,
-        sidebarOpen,
         mobileSidebarOpen,
         setSidebar,
         openMobileSidebar,

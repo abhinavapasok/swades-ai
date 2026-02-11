@@ -1,4 +1,3 @@
-import React from 'react'
 import { Package, CreditCard, HelpCircle, ArrowRight } from 'lucide-react'
 
 interface EmptyStateProps {

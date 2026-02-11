@@ -1,9 +1,8 @@
-import React from 'react'
 import useSWR from 'swr'
-import { CreditCard, DollarSign, Calendar, AlertCircle, CheckCircle2, History } from 'lucide-react'
+import { CreditCard, Calendar, AlertCircle, History } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { Payment } from '@/lib/api'
+
 import client from '@/lib/client'
 
 interface PaymentsViewProps {

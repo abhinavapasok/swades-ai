@@ -1,4 +1,3 @@
-import React from 'react'
 import useSWR from 'swr'
 import { ChevronDown, User, Check } from 'lucide-react'
 import {
@@ -20,7 +19,7 @@ interface UserSwitcherProps {
 }
 
 export function UserSwitcher({ currentUserId, onUserChange, collapsed = false }: UserSwitcherProps) {
-    const { data, error } = useSWR(
+    const { data, error: _error } = useSWR(
         'users',
         async () => {
             const res = await client.api.users.$get()

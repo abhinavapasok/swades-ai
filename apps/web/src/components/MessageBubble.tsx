@@ -1,9 +1,8 @@
-import React from 'react'
 import ReactMarkdown from 'react-markdown'
-import { User, Bot } from 'lucide-react'
+import { Bot } from 'lucide-react'
 import { ChatMessage, TypingState } from '../hooks/useChat'
 import { AgentBadge } from './AgentBadge'
-import { cn } from '@/lib/utils'
+
 
 interface MessageBubbleProps {
     message: ChatMessage

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { sendMessage, StreamEvent } from '../lib/api'
 
 export interface ChatMessage {
@@ -28,7 +28,7 @@ export function useChat({ userId, onConversationCreated }: UseChatOptions) {
   const [currentAgent, setCurrentAgent] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const streamingMessageIdRef = useRef<string | null>(null)
-  const abortControllerRef = useRef<AbortController | null>(null)
+
 
   const sendUserMessage = useCallback(async (content: string) => {
     if (!content.trim() || isLoading) return

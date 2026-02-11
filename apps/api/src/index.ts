@@ -11,10 +11,8 @@ import { userRoutes } from './routes/users.js'
 import { orderRoutes } from './routes/orders.js'
 import { paymentRoutes } from './routes/payments.js'
 
-// Create Hono app
 const app = new Hono()
 
-// Global middleware
 app.use('*', logger())
 app.use('*', cors({
   origin: (origin) => {
@@ -29,10 +27,8 @@ app.use('*', cors({
 }))
 app.use('*', errorHandler())
 
-// Rate limiting for API routes
-app.use('/api/*', rateLimiter(100, 60 * 1000)) // 100 requests per minute
+app.use('/api/*', rateLimiter(100, 60 * 1000))
 
-// API Routes
 const routes = app
   .route('/api/chat', chatRoutes)
   .route('/api/agents', agentRoutes)
@@ -41,7 +37,6 @@ const routes = app
   .route('/api/orders', orderRoutes)
   .route('/api/payments', paymentRoutes)
 
-// Root route
 app.get('/', (c) => {
   return c.json({
     name: 'SwadesAI Customer Support API',
@@ -54,7 +49,6 @@ app.get('/', (c) => {
   })
 })
 
-// 404 handler
 app.notFound((c) => {
   return c.json({
     error: {
@@ -64,7 +58,6 @@ app.notFound((c) => {
   }, 404)
 })
 
-// Start server
 const port = parseInt(process.env.PORT || '3001', 10)
 
 console.log(`🚀 Server starting on port ${port}`)

@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import useSWR from 'swr'
-import { deleteConversation, getConversation, ConversationListItem } from '../lib/api'
+import { deleteConversation, getConversation } from '../lib/api'
 import client from '../lib/client'
 
 interface UseConversationsOptions {
