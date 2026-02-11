@@ -104,19 +104,19 @@ export async function getPaymentHistory(userId: string, limit: number = 10) {
   }
 
   const totalPaid = payments
-    .filter(p => p.status === 'paid')
-    .reduce((sum, p) => sum + Number(p.amount), 0)
+    .filter((p: any) => p.status === 'paid')
+    .reduce((sum: number, p: any) => sum + Number(p.amount), 0)
 
   const totalRefunded = payments
-    .filter(p => p.refundStatus === 'completed')
-    .reduce((sum, p) => sum + Number(p.refundAmount || 0), 0)
+    .filter((p: any) => p.refundStatus === 'completed')
+    .reduce((sum: number, p: any) => sum + Number(p.refundAmount || 0), 0)
 
   return {
     found: true,
     totalPayments: payments.length,
     totalPaidAmount: totalPaid.toFixed(2),
     totalRefundedAmount: totalRefunded.toFixed(2),
-    payments: payments.map(payment => ({
+    payments: payments.map((payment: any) => ({
       invoiceNumber: payment.invoiceNumber,
       amount: payment.amount.toString(),
       status: payment.status,

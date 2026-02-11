@@ -38,10 +38,10 @@ export class ChatController {
       try {
         // Send typing indicator with router agent
         await stream.writeSSE({
-          data: JSON.stringify({ 
-            type: 'typing', 
+          data: JSON.stringify({
+            type: 'typing',
             agent: 'router',
-            message: 'Analyzing your request...' 
+            message: 'Analyzing your request...'
           }),
         })
 
@@ -73,7 +73,7 @@ export class ChatController {
 
         // Stream the response
         let fullContent = ''
-        
+
         for await (const chunk of result.stream.textStream) {
           fullContent += chunk
           await stream.writeSSE({
@@ -121,13 +121,13 @@ export class ChatController {
    */
   static getConversation = async (c: Context) => {
     const id = c.req.param('id')
-    
+
     const conversation = await ChatService.getConversationWithMessages(id)
-    
+
     if (!conversation) {
       return c.json({ error: { message: 'Conversation not found' } }, 404)
     }
-    
+
     return c.json(conversation)
   }
 
@@ -137,15 +137,15 @@ export class ChatController {
    */
   static listConversations = async (c: Context) => {
     const userId = c.req.query('userId')
-    
+
     if (!userId) {
       return c.json({ error: { message: 'userId query parameter is required' } }, 400)
     }
-    
+
     const conversations = await ChatService.listUserConversations(userId)
-    
+
     return c.json({
-      conversations: conversations.map(conv => ({
+      conversations: conversations.map((conv: any) => ({
         id: conv.id,
         title: conv.title,
         status: conv.status,
@@ -163,7 +163,7 @@ export class ChatController {
    */
   static deleteConversation = async (c: Context) => {
     const id = c.req.param('id')
-    
+
     try {
       await ChatService.deleteConversation(id)
       return c.json({ success: true, message: 'Conversation deleted' })

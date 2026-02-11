@@ -156,8 +156,8 @@ export class ChatService {
   }> {
     // Get conversation history for context
     const history = await this.getRecentMessages(conversationId)
-    const historyText = history.map(m => `${m.role}: ${m.content}`)
-    const messageHistory = history.map(m => ({
+    const historyText = history.map((m: any) => `${m.role}: ${m.content}`)
+    const messageHistory = history.map((m: any) => ({
       role: m.role as 'user' | 'assistant',
       content: m.content,
     }))

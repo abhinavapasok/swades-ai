@@ -5,7 +5,7 @@ import { prisma } from '../db/client.js'
  */
 export async function searchFAQs(query: string, category?: string) {
   const searchTerms = query.toLowerCase().split(' ').filter(term => term.length > 2)
-  
+
   const faqs = await prisma.fAQ.findMany({
     where: {
       ...(category && { category }),
@@ -43,7 +43,7 @@ export async function searchFAQs(query: string, category?: string) {
   return {
     found: true,
     count: faqs.length,
-    results: faqs.map(faq => ({
+    results: faqs.map((faq: any) => ({
       question: faq.question,
       answer: faq.answer,
       category: faq.category,
@@ -70,7 +70,7 @@ export async function getConversationHistory(conversationId: string, limit: numb
   return {
     conversationId,
     messageCount: messages.length,
-    messages: messages.reverse().map(msg => ({
+    messages: messages.reverse().map((msg: any) => ({
       role: msg.role,
       content: msg.content,
       agentType: msg.agentType,

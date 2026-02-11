@@ -30,7 +30,7 @@ export async function fetchOrderDetails(orderNumber: string) {
     trackingNumber: order.trackingNumber,
     estimatedDelivery: order.estimatedDelivery?.toISOString().split('T')[0],
     createdAt: order.createdAt.toISOString().split('T')[0],
-    items: order.items.map(item => ({
+    items: order.items.map((item: any) => ({
       productName: item.productName,
       quantity: item.quantity,
       price: item.price.toString(),
@@ -105,7 +105,7 @@ export async function getOrderHistory(userId: string, limit: number = 5) {
   return {
     found: true,
     totalOrders: orders.length,
-    orders: orders.map(order => ({
+    orders: orders.map((order: any) => ({
       orderNumber: order.orderNumber,
       status: order.status,
       totalAmount: order.totalAmount.toString(),
