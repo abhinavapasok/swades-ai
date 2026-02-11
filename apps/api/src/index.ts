@@ -7,6 +7,9 @@ import { rateLimiter } from './middleware/rateLimiter.js'
 import { chatRoutes } from './routes/chat.js'
 import { agentRoutes } from './routes/agents.js'
 import { healthRoutes } from './routes/health.js'
+import { userRoutes } from './routes/users.js'
+import { orderRoutes } from './routes/orders.js'
+import { paymentRoutes } from './routes/payments.js'
 
 // Create Hono app
 const app = new Hono()
@@ -16,7 +19,7 @@ app.use('*', logger())
 app.use('*', cors({
   origin: ['http://localhost:5173', 'http://localhost:3000'],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization'],
+  allowHeaders: ['Content-Type', 'Authorization', 'x-user-id'],
   exposeHeaders: ['X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'],
   credentials: true,
 }))
@@ -29,6 +32,9 @@ app.use('/api/*', rateLimiter(100, 60 * 1000)) // 100 requests per minute
 app.route('/api/chat', chatRoutes)
 app.route('/api/agents', agentRoutes)
 app.route('/api/health', healthRoutes)
+app.route('/api/users', userRoutes)
+app.route('/api/orders', orderRoutes)
+app.route('/api/payments', paymentRoutes)
 
 // Root route
 app.get('/', (c) => {

@@ -1,4 +1,5 @@
 import React from 'react'
+import { cn } from '@/lib/utils'
 
 interface TypingIndicatorProps {
     agent?: string
@@ -7,26 +8,33 @@ interface TypingIndicatorProps {
 
 const agentLabels: Record<string, string> = {
     router: 'Analyzing your request',
-    support: 'Support Agent is thinking',
-    order: 'Order Agent is thinking',
-    billing: 'Billing Agent is thinking',
+    support: 'Support is thinking',
+    order: 'Order agent is thinking',
+    billing: 'Billing agent is thinking',
 }
 
 export function TypingIndicator({ agent, message }: TypingIndicatorProps) {
-    const label = message || (agent && agentLabels[agent]) || 'AI is thinking'
+    const label = message || (agent && agentLabels[agent]) || 'Thinking'
 
     return (
-        <div className="flex items-center gap-3 px-4 py-2 animate-in fade-in slide-in-from-bottom-2">
-            <div className="flex gap-1">
-                {[0, 1, 2].map((i) => (
-                    <span
-                        key={i}
-                        className="h-2 w-2 rounded-full bg-muted-foreground/50 animate-bounce"
-                        style={{ animationDelay: `${i * 0.2}s`, animationDuration: '1.4s' }}
-                    />
-                ))}
+        <div className="flex gap-3 animate-fade-up">
+            {/* Avatar placeholder */}
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border bg-card mt-0.5">
+                <div className="flex gap-0.5">
+                    {[0, 1, 2].map((i) => (
+                        <span
+                            key={i}
+                            className="h-1 w-1 rounded-full bg-muted-foreground animate-dot-bounce"
+                            style={{ animationDelay: `${i * 0.16}s` }}
+                        />
+                    ))}
+                </div>
             </div>
-            <span className="text-sm italic text-muted-foreground">{label}...</span>
+
+            {/* Label */}
+            <div className="flex items-center pt-1">
+                <span className="text-sm text-muted-foreground">{label}...</span>
+            </div>
         </div>
     )
 }

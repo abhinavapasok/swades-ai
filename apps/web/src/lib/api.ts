@@ -1,4 +1,4 @@
-const API_BASE_URL = '/api'
+import apiClient from './axiosConfig'
 
 export interface Message {
   id: string
@@ -48,23 +48,18 @@ export interface StreamEvent {
 }
 
 /**
- * Send a message and stream the response
+ * Send a message and stream the response.
+ * Uses native fetch because axios doesn't support ReadableStream/SSE.
  */
 export async function* sendMessage(
   message: string,
   userId: string,
   conversationId?: string
 ): AsyncGenerator<StreamEvent> {
-  const response = await fetch(`${API_BASE_URL}/chat/messages`, {
+  const response = await fetch('/api/chat/messages', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      message,
-      userId,
-      conversationId,
-    }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, userId, conversationId }),
   })
 
   if (!response.ok) {
@@ -104,54 +99,39 @@ export async function* sendMessage(
  * Get a conversation with all messages
  */
 export async function getConversation(conversationId: string): Promise<Conversation> {
-  const response = await fetch(`${API_BASE_URL}/chat/conversations/${conversationId}`)
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`)
-  }
-  return response.json()
+  const { data } = await apiClient.get<Conversation>(`/chat/conversations/${conversationId}`)
+  return data
 }
 
 /**
  * List all conversations for a user
  */
 export async function listConversations(userId: string): Promise<{ conversations: ConversationListItem[] }> {
-  const response = await fetch(`${API_BASE_URL}/chat/conversations?userId=${userId}`)
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`)
-  }
-  return response.json()
+  const { data } = await apiClient.get<{ conversations: ConversationListItem[] }>('/chat/conversations', {
+    params: { userId },
+  })
+  return data
 }
 
 /**
  * Delete a conversation
  */
 export async function deleteConversation(conversationId: string): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/chat/conversations/${conversationId}`, {
-    method: 'DELETE',
-  })
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`)
-  }
+  await apiClient.delete(`/chat/conversations/${conversationId}`)
 }
 
 /**
  * List all available agents
  */
 export async function listAgents(): Promise<{ agents: Agent[] }> {
-  const response = await fetch(`${API_BASE_URL}/agents`)
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`)
-  }
-  return response.json()
+  const { data } = await apiClient.get<{ agents: Agent[] }>('/agents')
+  return data
 }
 
 /**
  * Get capabilities for a specific agent
  */
 export async function getAgentCapabilities(agentType: string): Promise<Agent> {
-  const response = await fetch(`${API_BASE_URL}/agents/${agentType}/capabilities`)
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`)
-  }
-  return response.json()
+  const { data } = await apiClient.get<Agent>(`/agents/${agentType}/capabilities`)
+  return data
 }

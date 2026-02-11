@@ -5,29 +5,28 @@ import { cn } from '@/lib/utils'
 interface AgentBadgeProps {
     type: string
     showLabel?: boolean
-    size?: 'sm' | 'md'
 }
 
 const agentConfig: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
     router: {
         label: 'Router',
         icon: <Bot className="h-3 w-3" />,
-        color: 'border-orange-500/50 text-orange-500',
+        color: 'text-orange-400 bg-orange-400/10',
     },
     support: {
         label: 'Support',
         icon: <HelpCircle className="h-3 w-3" />,
-        color: 'border-green-500/50 text-green-500',
+        color: 'text-green-400 bg-green-400/10',
     },
     order: {
         label: 'Order',
         icon: <ShoppingCart className="h-3 w-3" />,
-        color: 'border-blue-500/50 text-blue-500',
+        color: 'text-blue-400 bg-blue-400/10',
     },
     billing: {
         label: 'Billing',
         icon: <CreditCard className="h-3 w-3" />,
-        color: 'border-pink-500/50 text-pink-500',
+        color: 'text-purple-400 bg-purple-400/10',
     },
 }
 
@@ -36,7 +35,7 @@ export function AgentBadge({ type, showLabel = true }: AgentBadgeProps) {
 
     return (
         <span className={cn(
-            "inline-flex items-center gap-1.5 px-2 py-1 rounded-full border bg-muted/50 text-xs font-medium",
+            "inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium",
             config.color
         )}>
             {config.icon}

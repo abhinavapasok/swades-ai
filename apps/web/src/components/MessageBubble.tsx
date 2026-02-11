@@ -1,81 +1,56 @@
 import React from 'react'
 import ReactMarkdown from 'react-markdown'
-import { User, Bot, ShoppingCart, CreditCard, HelpCircle } from 'lucide-react'
-import { Avatar, AvatarFallback } from './ui/avatar'
+import { User, Bot } from 'lucide-react'
 import { ChatMessage } from '../hooks/useChat'
+import { AgentBadge } from './AgentBadge'
 import { cn } from '@/lib/utils'
 
 interface MessageBubbleProps {
     message: ChatMessage
 }
 
-const agentConfig: Record<string, { icon: React.ReactNode; label: string; color: string }> = {
-    support: {
-        icon: <HelpCircle className="h-3.5 w-3.5" />,
-        label: 'Support Agent',
-        color: 'text-green-500'
-    },
-    order: {
-        icon: <ShoppingCart className="h-3.5 w-3.5" />,
-        label: 'Order Agent',
-        color: 'text-blue-500'
-    },
-    billing: {
-        icon: <CreditCard className="h-3.5 w-3.5" />,
-        label: 'Billing Agent',
-        color: 'text-pink-500'
-    },
-}
-
 export function MessageBubble({ message }: MessageBubbleProps) {
     const isUser = message.role === 'user'
     const agentType = message.agentType || 'support'
-    const agent = agentConfig[agentType]
+
+    if (isUser) {
+        return (
+            <div className="flex justify-end animate-fade-up px-4">
+                <div className="max-w-[80%] rounded-2xl bg-primary px-4 py-2.5 text-primary-foreground shadow-md shadow-primary/10">
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                        {message.content}
+                    </p>
+                </div>
+            </div>
+        )
+    }
 
     return (
-        <div className={cn(
-            "flex gap-3 max-w-[85%] animate-in fade-in slide-in-from-bottom-2 duration-300",
-            isUser ? "ml-auto flex-row-reverse" : "mr-auto"
-        )}>
-            <Avatar className={cn(
-                "h-9 w-9 shrink-0",
-                isUser && "bg-gradient-to-br from-primary to-secondary"
-            )}>
-                <AvatarFallback className={cn(
-                    isUser ? "bg-transparent text-primary-foreground" : cn("bg-muted", agent?.color)
-                )}>
-                    {isUser ? (
-                        <User className="h-4 w-4" />
-                    ) : (
-                        agent?.icon || <Bot className="h-4 w-4" />
-                    )}
-                </AvatarFallback>
-            </Avatar>
+        <div className="flex gap-4 animate-fade-up px-4">
+            {/* AI Avatar */}
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-border bg-muted/50 mt-1 shadow-sm">
+                <Bot className="h-4 w-4 text-primary" />
+            </div>
 
-            <div className={cn(
-                "rounded-lg px-4 py-2.5 shadow-sm",
-                isUser
-                    ? "bg-gradient-to-br from-primary to-secondary text-primary-foreground"
-                    : "border border-border bg-card"
-            )}>
-                {!isUser && message.agentType && (
-                    <div className={cn(
-                        "mb-1.5 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium",
-                        "bg-muted/50",
-                        agent?.color
-                    )}>
-                        {agent?.icon}
-                        <span>{agent?.label}</span>
+            {/* Message Content */}
+            <div className="flex-1 min-w-0 space-y-2">
+                {/* Agent Label */}
+                {message.agentType && (
+                    <div className="flex items-center gap-2">
+                        <AgentBadge type={agentType} />
                     </div>
                 )}
-                <div className="prose prose-sm dark:prose-invert max-w-none">
-                    {isUser ? (
-                        <p className="m-0 whitespace-pre-wrap">{message.content}</p>
-                    ) : (
-                        <div className="[&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                            <ReactMarkdown>
-                                {message.content || (message.isStreaming ? '...' : '')}
-                            </ReactMarkdown>
+
+                {/* Message Text */}
+                <div className="prose-chat text-foreground bg-accent/5 rounded-2xl p-4 border border-border/50 backdrop-blur-sm shadow-sm">
+                    <ReactMarkdown>
+                        {message.content || ''}
+                    </ReactMarkdown>
+                    {message.isStreaming && !message.content && (
+                        <div className="flex gap-1 items-center mt-2">
+                            <span className="h-1.5 w-1.5 rounded-full bg-primary/40 animate-bounce" />
+                            <span className="h-1.5 w-1.5 rounded-full bg-primary/40 animate-bounce [animation-delay:0.2s]" />
+                            <span className="h-1.5 w-1.5 rounded-full bg-primary/40 animate-bounce [animation-delay:0.4s]" />
                         </div>
                     )}
                 </div>
