@@ -109,7 +109,16 @@ export async function* sendMessage(
   })
 
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`)
+    let errorMessage = `HTTP error! status: ${response.status}`
+    try {
+      const errorData = await response.json()
+      if (errorData.error?.message) {
+        errorMessage = errorData.error.message
+      }
+    } catch {
+      // If not JSON, use default error message
+    }
+    throw new Error(errorMessage)
   }
 
   const reader = response.body?.getReader()

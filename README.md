@@ -4,17 +4,17 @@ An AI-powered customer support system with a multi-agent architecture built with
 
 ## 🚀 Features
 
-- **Multi-Agent Architecture**: Router Agent that analyzes queries and routes to specialized sub-agents
-- **Google Gemini 2.0 Flash**: Powered by Google's latest Gemini models for fast, accurate responses
+- **Multi-Agent Architecture**: Router Agent that analyzes queries and routes to specialized sub-agents.
+- **Gemini 2.0 Flash**: Powered by Google's highly efficient Gemini 2.0 Flash model for fast, accurate, and cost-effective responses.
 - **Three Specialized Agents**:
-  - **Support Agent**: Handles FAQs, troubleshooting, and general inquiries
-  - **Order Agent**: Manages order tracking, status, and cancellations
-  - **Billing Agent**: Handles payments, refunds, and invoices
-- **Real-time Streaming**: Server-Sent Events for live AI responses
-- **Typing Indicators**: Shows which agent is processing the request
-- **Conversation History**: Persistent chat history with context awareness
-- **Rate Limiting**: Built-in API rate limiting
-- **Hono RPC**: Type-safe API communication
+  - **Support Agent**: Handles FAQs, troubleshooting, and general inquiries.
+  - **Order Agent**: Manages order tracking, status, and cancellations.
+  - **Billing Agent**: Handles payments, refunds, and invoices.
+- **Real-time Streaming**: Server-Sent Events (SSE) for live, interactive AI responses.
+- **Typing Indicators**: Visual feedback showing which agent is processing each request.
+- **Conversation History**: Persistent chat history for seamless context-aware interactions.
+- **Rate Limiting**: Built-in API rate limiting for security and stability.
+- **Hono RPC**: Type-safe end-to-end communication between frontend and backend.
 
 ## 🛠️ Tech Stack
 
@@ -25,7 +25,8 @@ An AI-powered customer support system with a multi-agent architecture built with
 | Backend | Hono.dev |
 | Database | PostgreSQL |
 | ORM | Prisma |
-| AI | Vercel AI SDK + Google Gemini 2.0 |
+| AI Infra | Vercel AI SDK |
+| AI Model | Google Gemini 2.0 Flash |
 
 ## 📁 Project Structure
 
@@ -37,20 +38,20 @@ swadesai-support/
 │   │   │   ├── agents/         # AI agents (router, support, order, billing)
 │   │   │   ├── controllers/    # Request handlers
 │   │   │   ├── services/       # Business logic
-│   │   │   ├── tools/          # Agent tools for DB queries
+│   │   │   ├── tools/          # Agent tools (Database queries)
 │   │   │   ├── middleware/     # Error handling, rate limiting
 │   │   │   ├── routes/         # API routes
-│   │   │   └── db/             # Database client
-│   │   └── prisma/             # Database schema and seed
+│   │   │   └── lib/            # Shared utilities (Model config)
+│   │   └── prisma/             # Database schema and seed scripts
 │   │
 │   └── web/                    # React + Vite frontend
 │       └── src/
-│           ├── components/     # UI components
-│           ├── hooks/          # React hooks
-│           └── lib/            # API client
+│           ├── components/     # UI components & Chat interface
+│           ├── hooks/          # React hooks for state & API
+│           └── lib/            # API client (Axios & streaming fetch)
 │
 └── packages/
-    └── shared/                 # Shared types
+    └── shared/                 # Shared types and validation schemas
 ```
 
 ## 🚦 Getting Started
@@ -58,16 +59,16 @@ swadesai-support/
 ### Prerequisites
 
 - Node.js >= 18
-- pnpm >= 9.0.0
-- **Docker & Docker Compose** (recommended) OR PostgreSQL installed locally
-- Google AI API key (get from https://aistudio.google.com/app/apikey)
+- pnpm >= 9.15.4
+- **Docker & Docker Compose** (recommended) OR PostgreSQL
+- Google AI API key (get from [AI Studio](https://aistudio.google.com/app/apikey))
 
 ### Option 1: Quick Start with Docker (Recommended)
 
 1. **Clone the repository**
    ```bash
-   git clone <repo-url>
-   cd swadesai-support
+   git clone https://github.com/abhinavapasok/swades-ai.git
+   cd swades-ai
    ```
 
 2. **Start PostgreSQL with Docker**
@@ -76,8 +77,7 @@ swadesai-support/
    ```
    
    This starts PostgreSQL on `localhost:5432` with:
-   - Username: `postgres`
-   - Password: `postgres`
+   - Username/Password: `postgres`
    - Database: `swadesai_support`
 
 3. **Install dependencies**
@@ -114,60 +114,9 @@ swadesai-support/
 
 ### Option 2: Using Local PostgreSQL
 
-### Prerequisites
+Follow the same steps as Option 1, but ensure your local PostgreSQL is running and update the `DATABASE_URL` in `apps/api/.env` accordingly.
 
-- Node.js >= 18
-- pnpm >= 9.0.0
-- PostgreSQL database (installed locally)
-- Google AI API key
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone <repo-url>
-   cd swadesai-support
-   ```
-
-2. **Install dependencies**
-   ```bash
-   pnpm install
-   ```
-
-3. **Configure environment**
-   ```bash
-   cp apps/api/.env.example apps/api/.env
-   ```
-   
-   Edit `apps/api/.env` and add:
-   ```env
-   DATABASE_URL="postgresql://postgres:postgres@localhost:5432/swadesai_support?schema=public"
-   GOOGLE_GENERATIVE_AI_API_KEY="your-google-ai-api-key"
-   PORT=3001
-   ```
-
-4. **Setup database**
-   ```bash
-   # Generate Prisma client
-   pnpm db:generate
-   
-   # Push schema to database
-   pnpm db:push
-   
-   # Seed with sample data
-   pnpm db:seed
-   ```
-
-5. **Start development servers**
-   ```bash
-   pnpm dev
-   ```
-
-   This will start:
-   - API server at `http://localhost:3001`
-   - Web app at `http://localhost:5173`
-
-## 📡 API Endpoints
+## 📡 API Endpoints (Local)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -176,33 +125,17 @@ swadesai-support/
 | GET | `/api/chat/conversations` | List user conversations |
 | DELETE | `/api/chat/conversations/:id` | Delete conversation |
 | GET | `/api/agents` | List available agents |
-| GET | `/api/agents/:type/capabilities` | Get agent capabilities |
-| GET | `/api/health` | Health check |
+| GET | `/api/health` | API Health check |
+
+> [!NOTE]
+> In production, the API is available at `https://swades-ai-api.vercel.app`. Note that the `/api` prefix is removed for all production requests.
 
 ## 🤖 Agent System
 
-### Router Agent
-Analyzes incoming queries and classifies intent into:
-- `support` - General inquiries and FAQs
-- `order` - Order-related queries
-- `billing` - Payment and invoice queries
-
-### Support Agent Tools
-- `searchFAQs` - Search FAQ database
-- `getConversationHistory` - Get conversation context
-- `getUserInfo` - Get user account details
-
-### Order Agent Tools
-- `fetchOrderDetails` - Get order information
-- `checkDeliveryStatus` - Check shipping status
-- `getOrderHistory` - List user orders
-- `cancelOrder` - Cancel eligible orders
-
-### Billing Agent Tools
-- `getInvoiceDetails` - Get invoice information
-- `checkRefundStatus` - Check refund status
-- `getPaymentHistory` - List payment history
-- `requestRefund` - Submit refund request
+- **Router Agent**: Analyzes queries and classifies intent into `support`, `order`, or `billing`.
+- **Support Agent**: Handles general inquiries using `searchFAQs` and `getUserInfo` tools.
+- **Order Agent**: Manages order tracking and cancellations via `fetchOrderDetails` and `checkDeliveryStatus`.
+- **Billing Agent**: Processes refunds and payment inquiries using `getInvoiceDetails` and `requestRefund`.
 
 ## 🧪 Sample Queries to Test
 
@@ -211,35 +144,15 @@ Analyzes incoming queries and classifies intent into:
 - "Check refund status for INV-2024-005"
 - "Show my recent orders"
 - "How do I reset my password?"
-- "View my payment history"
-
-## 📝 Sample Data
-
-The seed script creates:
-- 5 users
-- 8 orders with various statuses
-- 10 payments including refund scenarios
-- 15 FAQs covering common topics
-- Sample conversations
 
 ## 🔧 Development Commands
 
 ```bash
-# Development
 pnpm dev              # Start all apps in dev mode
-
-# Database
-pnpm db:generate      # Generate Prisma client
-pnpm db:push          # Push schema changes
-pnpm db:seed          # Seed database
-pnpm db:studio        # Open Prisma Studio
-
-# Build
-pnpm build            # Build all apps
-
-# Lint & Types
-pnpm lint             # Run linting
-pnpm check-types      # TypeScript checks
+pnpm build            # Build all apps for production
+pnpm db:studio        # Open Prisma Studio to view database data
+pnpm lint             # Run linting across the monorepo
+pnpm check-types      # Run TypeScript type checks
 ```
 
 ## 📄 License
