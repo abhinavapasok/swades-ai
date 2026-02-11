@@ -1,6 +1,6 @@
 import { generateObject } from 'ai'
-import { google } from '@ai-sdk/google'
 import { z } from 'zod'
+import { getModel } from './modelConfig.js'
 
 export type AgentType = 'support' | 'order' | 'billing'
 
@@ -42,7 +42,7 @@ export async function classifyIntent(
 
   try {
     const result = await generateObject({
-      model: google('gemini-2.5-flash'),
+      model: getModel(),
       schema: classificationSchema,
       system: CLASSIFICATION_SYSTEM_PROMPT,
       prompt: `${contextText}\n\nCurrent user query: "${query}"`,

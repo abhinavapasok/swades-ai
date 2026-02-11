@@ -1,10 +1,10 @@
 import { prisma } from '../db/client.js'
-import { 
-  classifyIntent, 
-  supportAgent, 
-  orderAgent, 
+import {
+  classifyIntent,
+  supportAgent,
+  orderAgent,
   billingAgent,
-  type AgentType 
+  type AgentType
 } from '../agents/index.js'
 
 export interface MessageData {
@@ -20,6 +20,17 @@ export class ChatService {
    * Create a new conversation for a user
    */
   static async createConversation(userId: string, title?: string) {
+    // Ensure user exists (handles fresh DB or unknown userId from frontend)
+    await prisma.user.upsert({
+      where: { id: userId },
+      update: {},
+      create: {
+        id: userId,
+        email: `${userId}@guest.local`,
+        name: 'Guest User',
+      },
+    })
+
     return prisma.conversation.create({
       data: {
         userId,
@@ -99,7 +110,7 @@ export class ChatService {
       const messageCount = await prisma.message.count({
         where: { conversationId: data.conversationId, role: 'user' },
       })
-      
+
       if (messageCount === 1) {
         // Set title to first 50 chars of first message
         await prisma.conversation.update({
