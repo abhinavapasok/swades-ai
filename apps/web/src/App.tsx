@@ -23,6 +23,10 @@ import { OrdersView } from './components/OrdersView'
 import { PaymentsView } from './components/PaymentsView'
 import { cn } from '@/lib/utils'
 import {
+    ConversationListItem,
+    Message as ApiMessage
+} from '@/lib/api'
+import {
     Tabs,
     TabsList,
     TabsTrigger,
@@ -40,6 +44,7 @@ function App() {
     const [activeView, setActiveView] = useState<ViewType>('chat')
     const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
     const [sidebarOpen, setSidebarOpen] = useState(true)
+    const [inputValue, setInputValue] = useState('')
 
     const {
         conversations,
@@ -76,7 +81,7 @@ function App() {
 
         setActiveConversationId(conversationId)
         const convMessages = await loadConversationMessages(conversationId)
-        const formattedMessages: ChatMessage[] = convMessages.map((msg: any) => ({
+        const formattedMessages = convMessages.map((msg: ApiMessage) => ({
             id: msg.id,
             role: msg.role as 'user' | 'assistant',
             content: msg.content,
@@ -93,7 +98,12 @@ function App() {
     }
 
     const handleSuggestion = (suggestion: string) => {
-        sendMessage(suggestion)
+        setInputValue(suggestion)
+    }
+
+    const handleViewAction = (prompt: string) => {
+        setInputValue(prompt)
+        setActiveView('chat')
     }
 
     const handleUserChange = (newUserId: string) => {
@@ -177,7 +187,7 @@ function App() {
                                 <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Recent Chats</p>
                                 <div className="space-y-0.5">
                                     {conversations.length > 0 ? (
-                                        conversations.map(conv => (
+                                        conversations.map((conv: ConversationListItem) => (
                                             <ConversationItem
                                                 key={conv.id}
                                                 conversation={conv}
@@ -236,7 +246,12 @@ function App() {
                             {/* Chat Input */}
                             <div className="border-t border-border/50 bg-background/80 backdrop-blur-sm p-4">
                                 <ChatInput
-                                    onSend={sendMessage}
+                                    value={inputValue}
+                                    onChange={setInputValue}
+                                    onSend={(msg) => {
+                                        sendMessage(msg)
+                                        setInputValue('')
+                                    }}
                                     isLoading={isLoading}
                                     placeholder="Ask anything about your orders, billing, or technical support..."
                                 />
@@ -244,11 +259,11 @@ function App() {
                         </div>
                     ) : activeView === 'orders' ? (
                         <div className="h-full overflow-y-auto scrollbar-thin">
-                            <OrdersView userId={userId} />
+                            <OrdersView userId={userId} onAction={handleViewAction} />
                         </div>
                     ) : (
                         <div className="h-full overflow-y-auto scrollbar-thin">
-                            <PaymentsView userId={userId} />
+                            <PaymentsView userId={userId} onAction={handleViewAction} />
                         </div>
                     )}
                 </div>

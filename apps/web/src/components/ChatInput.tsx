@@ -5,10 +5,11 @@ interface ChatInputProps {
     onSend: (message: string) => void
     isLoading: boolean
     placeholder?: string
+    value: string
+    onChange: (value: string) => void
 }
 
-export function ChatInput({ onSend, isLoading, placeholder }: ChatInputProps) {
-    const [value, setValue] = useState('')
+export function ChatInput({ onSend, isLoading, placeholder, value, onChange }: ChatInputProps) {
     const textareaRef = useRef<HTMLTextAreaElement>(null)
 
     // Auto-resize textarea
@@ -23,7 +24,6 @@ export function ChatInput({ onSend, isLoading, placeholder }: ChatInputProps) {
     const handleSubmit = () => {
         if (value.trim() && !isLoading) {
             onSend(value.trim())
-            setValue('')
             // Reset height
             if (textareaRef.current) {
                 textareaRef.current.style.height = 'auto'
@@ -47,7 +47,7 @@ export function ChatInput({ onSend, isLoading, placeholder }: ChatInputProps) {
                     <textarea
                         ref={textareaRef}
                         value={value}
-                        onChange={(e) => setValue(e.target.value)}
+                        onChange={(e) => onChange(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder={placeholder || 'Send a message...'}
                         rows={1}

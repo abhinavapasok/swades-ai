@@ -3,11 +3,11 @@ import useSWR from 'swr'
 import { CreditCard, DollarSign, Calendar, AlertCircle, CheckCircle2, History } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+import { swrFetcher, Payment } from '@/lib/api'
 
 interface PaymentsViewProps {
     userId: string
+    onAction?: (action: string) => void
 }
 
 const statusColors: Record<string, string> = {
@@ -17,8 +17,8 @@ const statusColors: Record<string, string> = {
     refunded: "bg-purple-500/10 text-purple-500 border-purple-500/20",
 }
 
-export function PaymentsView({ userId }: PaymentsViewProps) {
-    const { data, error, isLoading } = useSWR(`http://localhost:3001/api/payments?userId=${userId}`, fetcher)
+export function PaymentsView({ userId, onAction }: PaymentsViewProps) {
+    const { data, error, isLoading } = useSWR(`/payments?userId=${userId}`, swrFetcher)
 
     if (isLoading) return <div className="p-8 text-center text-muted-foreground">Loading payments...</div>
     if (error) return <div className="p-8 text-center text-destructive">Failed to load payments</div>
@@ -38,7 +38,7 @@ export function PaymentsView({ userId }: PaymentsViewProps) {
         <div className="max-w-4xl mx-auto p-6 space-y-6">
             <h2 className="text-2xl font-bold tracking-tight">Payment History</h2>
             <div className="grid gap-4">
-                {payments.map((payment: any) => (
+                {payments.map((payment: Payment) => (
                     <div key={payment.id} className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
                         <div className="p-6">
                             <div className="flex flex-wrap items-center justify-between gap-4">
@@ -52,6 +52,15 @@ export function PaymentsView({ userId }: PaymentsViewProps) {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-6">
+                                    {onAction && (
+                                        <button
+                                            onClick={() => onAction(`Check status of payment ${payment.invoiceNumber}`)}
+                                            className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 bg-primary/5 px-3 py-1.5 rounded-lg transition-colors hover:bg-primary/10"
+                                        >
+                                            <AlertCircle className="h-3.5 w-3.5" />
+                                            Get Help
+                                        </button>
+                                    )}
                                     <div className="text-right">
                                         <p className="text-sm font-medium text-muted-foreground italic">{payment.paymentMethod.replace('_', ' ')}</p>
                                         <p className="text-2xl font-bold tracking-tight">${Number(payment.amount).toFixed(2)}</p>

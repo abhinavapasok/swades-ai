@@ -1,15 +1,16 @@
 import React from 'react'
 import ReactMarkdown from 'react-markdown'
 import { User, Bot } from 'lucide-react'
-import { ChatMessage } from '../hooks/useChat'
+import { ChatMessage, TypingState } from '../hooks/useChat'
 import { AgentBadge } from './AgentBadge'
 import { cn } from '@/lib/utils'
 
 interface MessageBubbleProps {
     message: ChatMessage
+    typing?: TypingState
 }
 
-export function MessageBubble({ message }: MessageBubbleProps) {
+export function MessageBubble({ message, typing }: MessageBubbleProps) {
     const isUser = message.role === 'user'
     const agentType = message.agentType || 'support'
 
@@ -43,14 +44,22 @@ export function MessageBubble({ message }: MessageBubbleProps) {
 
                 {/* Message Text */}
                 <div className="prose-chat text-foreground bg-accent/5 rounded-2xl p-4 border border-border/50 backdrop-blur-sm shadow-sm">
-                    <ReactMarkdown>
-                        {message.content || ''}
-                    </ReactMarkdown>
-                    {message.isStreaming && !message.content && (
-                        <div className="flex gap-1 items-center mt-2">
-                            <span className="h-1.5 w-1.5 rounded-full bg-primary/40 animate-bounce" />
-                            <span className="h-1.5 w-1.5 rounded-full bg-primary/40 animate-bounce [animation-delay:0.2s]" />
-                            <span className="h-1.5 w-1.5 rounded-full bg-primary/40 animate-bounce [animation-delay:0.4s]" />
+                    {message.content ? (
+                        <ReactMarkdown>
+                            {message.content}
+                        </ReactMarkdown>
+                    ) : (
+                        <div className="flex flex-col gap-2">
+                            {typing?.isTyping && typing.message && (
+                                <span className="text-xs text-muted-foreground animate-pulse">
+                                    {typing.message}...
+                                </span>
+                            )}
+                            <div className="flex gap-1 items-center">
+                                <span className="h-1.5 w-1.5 rounded-full bg-primary/40 animate-bounce" />
+                                <span className="h-1.5 w-1.5 rounded-full bg-primary/40 animate-bounce [animation-delay:0.2s]" />
+                                <span className="h-1.5 w-1.5 rounded-full bg-primary/40 animate-bounce [animation-delay:0.4s]" />
+                            </div>
                         </div>
                     )}
                 </div>

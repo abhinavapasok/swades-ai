@@ -1,5 +1,7 @@
 import apiClient from './axiosConfig'
 
+// --- Types & Interfaces ---
+
 export interface Message {
   id: string
   conversationId: string
@@ -37,6 +39,40 @@ export interface Agent {
   capabilities: string[]
 }
 
+export interface User {
+  id: string
+  name: string
+  email: string
+}
+
+export interface OrderItem {
+  id: string
+  productName: string
+  quantity: number
+  price: number
+}
+
+export interface Order {
+  id: string
+  orderNumber: string
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  totalAmount: number
+  shippingAddress: string
+  trackingNumber?: string
+  items: OrderItem[]
+  createdAt: string
+}
+
+export interface Payment {
+  id: string
+  invoiceNumber: string
+  amount: number
+  status: 'paid' | 'pending' | 'failed' | 'refunded'
+  paymentMethod: string
+  refundAmount?: number
+  createdAt: string
+}
+
 export interface StreamEvent {
   type: 'typing' | 'agent' | 'content' | 'done' | 'error'
   agent?: string
@@ -47,9 +83,18 @@ export interface StreamEvent {
   confidence?: number
 }
 
+// --- Fetchers & SWR ---
+
+/**
+ * Standard SWR fetcher using the centralized apiClient (Axios)
+ */
+export const swrFetcher = (url: string) => apiClient.get(url).then((res) => res.data)
+
+// --- API Functions ---
+
 /**
  * Send a message and stream the response.
- * Uses native fetch because axios doesn't support ReadableStream/SSE.
+ * NOTE: Uses native fetch because Axios does not natively support ReadableStream/SSE streaming as well as fetch does.
  */
 export async function* sendMessage(
   message: string,
@@ -96,7 +141,7 @@ export async function* sendMessage(
 }
 
 /**
- * Get a conversation with all messages
+ * Get a single conversation with all its messages
  */
 export async function getConversation(conversationId: string): Promise<Conversation> {
   const { data } = await apiClient.get<Conversation>(`/chat/conversations/${conversationId}`)
@@ -104,7 +149,7 @@ export async function getConversation(conversationId: string): Promise<Conversat
 }
 
 /**
- * List all conversations for a user
+ * List all conversations for a specific user
  */
 export async function listConversations(userId: string): Promise<{ conversations: ConversationListItem[] }> {
   const { data } = await apiClient.get<{ conversations: ConversationListItem[] }>('/chat/conversations', {
@@ -114,14 +159,14 @@ export async function listConversations(userId: string): Promise<{ conversations
 }
 
 /**
- * Delete a conversation
+ * Delete a specific conversation by ID
  */
 export async function deleteConversation(conversationId: string): Promise<void> {
   await apiClient.delete(`/chat/conversations/${conversationId}`)
 }
 
 /**
- * List all available agents
+ * List all available AI agents in the system
  */
 export async function listAgents(): Promise<{ agents: Agent[] }> {
   const { data } = await apiClient.get<{ agents: Agent[] }>('/agents')
@@ -129,9 +174,37 @@ export async function listAgents(): Promise<{ agents: Agent[] }> {
 }
 
 /**
- * Get capabilities for a specific agent
+ * Get capabilities and details for a specific agent type
  */
 export async function getAgentCapabilities(agentType: string): Promise<Agent> {
   const { data } = await apiClient.get<Agent>(`/agents/${agentType}/capabilities`)
+  return data
+}
+
+/**
+ * List all users (demo purposes)
+ */
+export async function listUsers(): Promise<{ data: User[] }> {
+  const { data } = await apiClient.get<{ data: User[] }>('/users')
+  return data
+}
+
+/**
+ * List all orders for a specific user
+ */
+export async function listOrders(userId: string): Promise<{ data: Order[] }> {
+  const { data } = await apiClient.get<{ data: Order[] }>('/orders', {
+    params: { userId },
+  })
+  return data
+}
+
+/**
+ * List all payments for a specific user
+ */
+export async function listPayments(userId: string): Promise<{ data: Payment[] }> {
+  const { data } = await apiClient.get<{ data: Payment[] }>('/payments', {
+    params: { userId },
+  })
   return data
 }

@@ -27,6 +27,7 @@ export function useChat({ userId, onConversationCreated }: UseChatOptions) {
   const [typing, setTyping] = useState<TypingState>({ isTyping: false })
   const [currentAgent, setCurrentAgent] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const streamingMessageIdRef = useRef<string | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
 
   const sendUserMessage = useCallback(async (content: string) => {
@@ -43,32 +44,43 @@ export function useChat({ userId, onConversationCreated }: UseChatOptions) {
     }
     setMessages(prev => [...prev, userMessage])
 
-    // Create assistant message placeholder
-    const assistantId = `assistant-${Date.now()}`
-    setMessages(prev => [...prev, {
-      id: assistantId,
-      role: 'assistant',
-      content: '',
-      isStreaming: true,
-    }])
+    // Clear any previous streaming message tracking
+    streamingMessageIdRef.current = null
 
     try {
       const stream = sendMessage(content, userId, conversationId || undefined)
 
       for await (const event of stream) {
-        handleStreamEvent(event, assistantId)
+        handleStreamEvent(event)
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
-      // Remove empty assistant message on error
-      setMessages(prev => prev.filter(m => m.id !== assistantId || m.content))
+      // Cleanup empty assistant message on error if it was created
+      const id = streamingMessageIdRef.current
+      if (id) {
+        setMessages(prev => prev.filter(m => m.id !== id || m.content))
+      }
     } finally {
       setIsLoading(false)
       setTyping({ isTyping: false })
     }
   }, [userId, conversationId, isLoading])
 
-  const handleStreamEvent = useCallback((event: StreamEvent, assistantId: string) => {
+  const handleStreamEvent = useCallback((event: StreamEvent) => {
+    const getOrCreateAssistantMessage = () => {
+      if (streamingMessageIdRef.current) return streamingMessageIdRef.current
+
+      const newId = `assistant-${Date.now()}`
+      streamingMessageIdRef.current = newId
+      setMessages(prev => [...prev, {
+        id: newId,
+        role: 'assistant',
+        content: '',
+        isStreaming: true,
+      }])
+      return newId
+    }
+
     switch (event.type) {
       case 'typing':
         setTyping({
@@ -78,31 +90,40 @@ export function useChat({ userId, onConversationCreated }: UseChatOptions) {
         })
         break
 
-      case 'agent':
+      case 'agent': {
+        const id = getOrCreateAssistantMessage()
+        setTyping({ isTyping: false }) // Clear typing indicator once an agent takes over
         setCurrentAgent(event.agent || null)
         setMessages(prev => prev.map(m =>
-          m.id === assistantId ? { ...m, agentType: event.agent } : m
+          m.id === id ? { ...m, agentType: event.agent } : m
         ))
         break
+      }
 
-      case 'content':
+      case 'content': {
+        const id = getOrCreateAssistantMessage()
         setTyping({ isTyping: false })
         setMessages(prev => prev.map(m =>
-          m.id === assistantId
+          m.id === id
             ? { ...m, content: m.content + (event.text || '') }
             : m
         ))
         break
+      }
 
-      case 'done':
-        setMessages(prev => prev.map(m =>
-          m.id === assistantId ? { ...m, isStreaming: false } : m
-        ))
+      case 'done': {
+        const id = streamingMessageIdRef.current
+        if (id) {
+          setMessages(prev => prev.map(m =>
+            m.id === id ? { ...m, isStreaming: false } : m
+          ))
+        }
         if (event.conversationId && !conversationId) {
           setConversationId(event.conversationId)
           onConversationCreated?.(event.conversationId)
         }
         break
+      }
 
       case 'error':
         setError(event.message || 'An error occurred')

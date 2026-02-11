@@ -24,9 +24,13 @@ export function MessageList({ messages, typing }: MessageListProps) {
         >
             <div className="mx-auto max-w-3xl px-4 py-6 space-y-6">
                 {messages.map(message => (
-                    <MessageBubble key={message.id} message={message} />
+                    <MessageBubble
+                        key={message.id}
+                        message={message}
+                        typing={message.isStreaming && message.role === 'assistant' ? typing : undefined}
+                    />
                 ))}
-                {typing.isTyping && (
+                {typing.isTyping && !messages.some(m => m.isStreaming && m.role === 'assistant') && (
                     <TypingIndicator agent={typing.agent} message={typing.message} />
                 )}
                 <div ref={bottomRef} />

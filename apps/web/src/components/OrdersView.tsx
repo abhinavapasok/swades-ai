@@ -3,11 +3,11 @@ import useSWR from 'swr'
 import { Package, Truck, Clock, CheckCircle2, XCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+import { swrFetcher, Order } from '@/lib/api'
 
 interface OrdersViewProps {
     userId: string
+    onAction?: (action: string) => void
 }
 
 const statusColors: Record<string, string> = {
@@ -29,8 +29,8 @@ const StatusIcon = ({ status }: { status: string }) => {
     }
 }
 
-export function OrdersView({ userId }: OrdersViewProps) {
-    const { data, error, isLoading } = useSWR(`http://localhost:3001/api/orders?userId=${userId}`, fetcher)
+export function OrdersView({ userId, onAction }: OrdersViewProps) {
+    const { data, error, isLoading } = useSWR(`/orders?userId=${userId}`, swrFetcher)
 
     if (isLoading) return <div className="p-8 text-center text-muted-foreground">Loading orders...</div>
     if (error) return <div className="p-8 text-center text-destructive">Failed to load orders</div>
@@ -50,7 +50,7 @@ export function OrdersView({ userId }: OrdersViewProps) {
         <div className="max-w-4xl mx-auto p-6 space-y-6">
             <h2 className="text-2xl font-bold tracking-tight">Your Orders</h2>
             <div className="grid gap-4">
-                {orders.map((order: any) => (
+                {orders.map((order: Order) => (
                     <div key={order.id} className="rounded-xl border border-border bg-card p-6 shadow-sm">
                         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                             <div className="space-y-1">
@@ -58,6 +58,15 @@ export function OrdersView({ userId }: OrdersViewProps) {
                                 <p className="text-base font-semibold uppercase tracking-wider">{order.orderNumber}</p>
                             </div>
                             <div className="flex items-center gap-4">
+                                {onAction && (
+                                    <button
+                                        onClick={() => onAction(`Track my order ${order.orderNumber}`)}
+                                        className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 bg-primary/5 px-3 py-1.5 rounded-lg transition-colors hover:bg-primary/10"
+                                    >
+                                        <Truck className="h-3.5 w-3.5" />
+                                        Track Order
+                                    </button>
+                                )}
                                 <Badge variant="outline" className={cn("flex items-center gap-1.5 px-3 py-1 capitalize", statusColors[order.status])}>
                                     <StatusIcon status={order.status} />
                                     {order.status}

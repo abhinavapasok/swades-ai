@@ -9,8 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+import { swrFetcher, User as ApiUser } from '@/lib/api'
 
 interface UserSwitcherProps {
     currentUserId: string
@@ -18,10 +17,10 @@ interface UserSwitcherProps {
 }
 
 export function UserSwitcher({ currentUserId, onUserChange }: UserSwitcherProps) {
-    const { data, error } = useSWR('http://localhost:3001/api/users', fetcher)
+    const { data, error } = useSWR('/users', swrFetcher)
 
-    const users = data?.data || []
-    const currentUser = users.find((u: any) => u.id === currentUserId)
+    const users: ApiUser[] = data?.data || []
+    const currentUser = users.find((u) => u.id === currentUserId)
 
     return (
         <DropdownMenu>
