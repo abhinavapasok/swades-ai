@@ -2,6 +2,7 @@ import useSWR from 'swr'
 import { CreditCard, Calendar, AlertCircle, History } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { formatCurrency, formatDate } from '@swadesai/shared'
 
 import client from '@/lib/client'
 
@@ -70,7 +71,7 @@ export function PaymentsView({ userId, onAction }: PaymentsViewProps) {
                                     )}
                                     <div className="text-right">
                                         <p className="text-sm font-medium text-muted-foreground italic">{payment.paymentMethod.replace('_', ' ')}</p>
-                                        <p className="text-2xl font-bold tracking-tight">${Number(payment.amount).toFixed(2)}</p>
+                                        <p className="text-2xl font-bold tracking-tight">{formatCurrency(payment.amount)}</p>
                                     </div>
                                     <Badge variant="outline" className={cn("px-3 py-1 capitalize", statusColors[payment.status])}>
                                         {payment.status}
@@ -81,12 +82,12 @@ export function PaymentsView({ userId, onAction }: PaymentsViewProps) {
                             <div className="flex flex-wrap items-center gap-6 mt-6 pt-6 border-t border-border text-sm text-muted-foreground">
                                 <div className="flex items-center gap-2">
                                     <Calendar className="h-4 w-4" />
-                                    <span>{new Date(payment.createdAt).toLocaleDateString()}</span>
+                                    <span>{formatDate(payment.createdAt)}</span>
                                 </div>
                                 {payment.refundAmount && (
                                     <div className="flex items-center gap-2 text-purple-600 font-medium">
                                         <History className="h-4 w-4" />
-                                        <span>Refunded: ${Number(payment.refundAmount).toFixed(2)}</span>
+                                        <span>Refunded: {formatCurrency(payment.refundAmount)}</span>
                                     </div>
                                 )}
                             </div>

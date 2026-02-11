@@ -1,8 +1,21 @@
+import { z } from 'zod';
+import {
+  ClassificationResultSchema,
+  StreamEventSchema,
+  AgentTypeSchema
+} from './schemas';
+import { MESSAGE_ROLES, CONVERSATION_STATUSES, ORDER_STATUSES, PAYMENT_STATUSES, PAYMENT_METHODS, REFUND_STATUSES } from './constants';
+
+// Derived types from schemas
+export type AgentType = z.infer<typeof AgentTypeSchema>;
+export type ClassificationResult = z.infer<typeof ClassificationResultSchema>;
+export type StreamEvent = z.infer<typeof StreamEventSchema>;
+
 // Message types
 export interface Message {
   id: string
   conversationId: string
-  role: 'user' | 'assistant' | 'system'
+  role: typeof MESSAGE_ROLES[number]
   content: string
   agentType?: AgentType
   metadata?: Record<string, unknown>
@@ -20,44 +33,14 @@ export interface Conversation {
   messages?: Message[]
 }
 
-export type ConversationStatus = 'active' | 'resolved' | 'archived'
+export type ConversationStatus = typeof CONVERSATION_STATUSES[number];
 
 // Agent types
-export type AgentType = 'router' | 'support' | 'order' | 'billing'
-
 export interface Agent {
-  type: AgentType
+  type: AgentType | 'router'
   name: string
   description: string
   capabilities: string[]
-}
-
-export interface ClassificationResult {
-  agentType: AgentType
-  confidence: number
-  reasoning: string
-}
-
-// API Response types
-export interface ApiResponse<T> {
-  data?: T
-  error?: ApiError
-}
-
-export interface ApiError {
-  message: string
-  code?: string
-}
-
-// Stream event types
-export interface StreamEvent {
-  type: 'typing' | 'agent' | 'content' | 'done' | 'error'
-  agent?: string
-  text?: string
-  message?: string
-  conversationId?: string
-  reasoning?: string
-  confidence?: number
 }
 
 // Order types
@@ -75,7 +58,7 @@ export interface Order {
   items: OrderItem[]
 }
 
-export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+export type OrderStatus = typeof ORDER_STATUSES[number];
 
 export interface OrderItem {
   id: string
@@ -99,9 +82,9 @@ export interface Payment {
   updatedAt: Date
 }
 
-export type PaymentStatus = 'paid' | 'pending' | 'failed' | 'refunded'
-export type PaymentMethod = 'credit_card' | 'paypal' | 'bank_transfer'
-export type RefundStatus = 'requested' | 'processing' | 'completed' | 'rejected'
+export type PaymentStatus = typeof PAYMENT_STATUSES[number];
+export type PaymentMethod = typeof PAYMENT_METHODS[number];
+export type RefundStatus = typeof REFUND_STATUSES[number];
 
 // User types
 export interface User {
@@ -110,4 +93,15 @@ export interface User {
   name: string
   createdAt: Date
   updatedAt: Date
+}
+
+// API Response types
+export interface ApiResponse<T> {
+  data?: T
+  error?: ApiError
+}
+
+export interface ApiError {
+  message: string
+  code?: string
 }

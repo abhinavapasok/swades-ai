@@ -2,6 +2,7 @@ import useSWR from 'swr'
 import { Package, Truck, Clock, CheckCircle2, XCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { formatCurrency } from '@swadesai/shared'
 
 import client from '@/lib/client'
 
@@ -80,7 +81,7 @@ export function OrdersView({ userId, onAction }: OrdersViewProps) {
                                 </Badge>
                                 <div className="text-right">
                                     <p className="text-sm font-medium text-muted-foreground">Total Amount</p>
-                                    <p className="text-xl font-bold">${Number(order.totalAmount).toFixed(2)}</p>
+                                    <p className="text-xl font-bold">{formatCurrency(order.totalAmount)}</p>
                                 </div>
                             </div>
                         </div>
@@ -96,7 +97,7 @@ export function OrdersView({ userId, onAction }: OrdersViewProps) {
                                             </div>
                                             <span className="font-medium">{item.productName}</span>
                                         </div>
-                                        <span className="font-semibold">${Number(item.price).toFixed(2)}</span>
+                                        <span className="font-semibold">{formatCurrency(item.price)}</span>
                                     </div>
                                 ))}
                             </div>

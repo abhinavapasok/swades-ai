@@ -5,12 +5,6 @@ import type { AppType } from '@swadesai/api'
 import {
   type StreamEvent,
   type AgentType,
-  type Conversation as SharedConversation,
-  type Message as SharedMessage,
-  type Agent as SharedAgent,
-  type User as SharedUser,
-  type Order as SharedOrder,
-  type Payment as SharedPayment
 } from '@swadesai/shared'
 
 export type { StreamEvent, AgentType }

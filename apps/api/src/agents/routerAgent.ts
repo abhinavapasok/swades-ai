@@ -2,15 +2,9 @@ import { generateText, Output } from 'ai'
 import { z } from 'zod'
 import { getModel } from '../lib/modelConfig.js'
 
-import { type AgentType, type ClassificationResult, type Agent } from '@swadesai/shared'
+import { type AgentType, type ClassificationResult, type Agent, ClassificationResultSchema } from '@swadesai/shared'
 
 export { type AgentType, type ClassificationResult }
-
-const classificationSchema = z.object({
-  agentType: z.enum(['support', 'order', 'billing']),
-  confidence: z.number().min(0).max(1),
-  reasoning: z.string(),
-})
 
 const CLASSIFICATION_SYSTEM_PROMPT = `You are a customer support router. Analyze the user's query and classify it into one of these categories:
 
@@ -40,7 +34,7 @@ export async function classifyIntent(
     const { output } = await generateText({
       model: getModel(),
       output: Output.object({
-        schema: classificationSchema,
+        schema: ClassificationResultSchema,
       }),
       system: CLASSIFICATION_SYSTEM_PROMPT,
       prompt: `${contextText}\n\nCurrent user query: "${query}"`,
