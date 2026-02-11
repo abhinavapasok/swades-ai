@@ -3,8 +3,8 @@ import {
   ClassificationResultSchema,
   StreamEventSchema,
   AgentTypeSchema
-} from './schemas';
-import { MESSAGE_ROLES, CONVERSATION_STATUSES, ORDER_STATUSES, PAYMENT_STATUSES, PAYMENT_METHODS, REFUND_STATUSES } from './constants';
+} from './schemas.js';
+import { MESSAGE_ROLES, CONVERSATION_STATUSES, ORDER_STATUSES, PAYMENT_STATUSES, PAYMENT_METHODS, REFUND_STATUSES } from './constants.js';
 
 // Derived types from schemas
 export type AgentType = z.infer<typeof AgentTypeSchema>;
