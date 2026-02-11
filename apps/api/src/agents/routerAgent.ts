@@ -1,4 +1,4 @@
-import { generateObject } from 'ai'
+import { generateText, Output } from 'ai'
 import { z } from 'zod'
 import { getModel } from '../lib/modelConfig.js'
 
@@ -41,14 +41,20 @@ export async function classifyIntent(
     : ''
 
   try {
-    const result = await generateObject({
+    const { output } = await generateText({
       model: getModel(),
-      schema: classificationSchema,
+      output: Output.object({
+        schema: classificationSchema,
+      }),
       system: CLASSIFICATION_SYSTEM_PROMPT,
       prompt: `${contextText}\n\nCurrent user query: "${query}"`,
     })
 
-    return result.object
+    if (!output) {
+      throw new Error('Classification result is undefined')
+    }
+
+    return output
   } catch (error) {
     console.error('Classification error:', error)
     // Default to support agent on classification failure

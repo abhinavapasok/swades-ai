@@ -17,7 +17,11 @@ const app = new Hono()
 // Global middleware
 app.use('*', logger())
 app.use('*', cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  origin: (origin) => {
+    const allowedOrigin = process.env.ALLOWED_ORIGIN
+    if (!allowedOrigin || allowedOrigin === '*') return '*'
+    return allowedOrigin.split(',').includes(origin) ? origin : allowedOrigin.split(',')[0]
+  },
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization', 'x-user-id'],
   exposeHeaders: ['X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'],
@@ -62,11 +66,12 @@ app.notFound((c) => {
 // Start server
 const port = parseInt(process.env.PORT || '3001', 10)
 
-console.log(`🚀 Server starting on http://localhost:${port}`)
+console.log(`🚀 Server starting on port ${port}`)
 
 serve({
   fetch: app.fetch,
   port,
+  hostname: '0.0.0.0'
 })
 
 // Export for type inference (Hono RPC)
